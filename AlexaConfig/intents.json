@@ -1,0 +1,13 @@
+{
+  "intents": [
+    {
+      "intent": "GetOfficeCalendarToday",
+      "slots": [
+        {
+          "name": "Date",
+          "type": "LIST_OF_DATES"
+        }
+      ]
+    }
+  ]
+}
