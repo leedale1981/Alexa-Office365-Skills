@@ -1,0 +1,51 @@
+﻿@model  ATT.Alexa.Office365.Models.Company
+@{ 
+    ViewBag.Title = "Alexa Office 365 Company Creation";
+}
+
+@using (Html.BeginForm("Add", "Company", FormMethod.Post))
+{
+    <span class="ms-font-xl">Enter the App Id and App Secret from your Microsoft Application Registration.</span>
+    <br />
+    <span class="ms-font-m">You can register your app at <a href="https://apps.dev.microsoft.com">https://apps.dev.microsoft.com</a></span>
+    <div id="configs" class="ms-Grid">
+        <div class="ms-Grid-row">
+            <div class="ms-Grid-col ms-u-sm2 ms-u-md2 ms-u-lg3">
+                <div class="ms-TextField">
+                    <label class="ms-TextField ms-font-s-plus">
+                        <span class="ms-Label">Your Company Name</span>
+                    </label>
+                    @Html.TextBoxFor(model => model.CompanyName, new { @class = "ms-TextField-field" })
+                </div>
+            </div>
+        </div>
+        <div class="ms-Grid-row">
+            <div class="ms-Grid-col ms-u-sm2 ms-u-md2 ms-u-lg3">
+                <div class="ms-TextField">
+                    <label class="ms-TextField ms-font-s-plus">
+                        <span class="ms-Label">Your App Id</span>
+                    </label>
+                    @Html.TextBoxFor(model => model.AppId, new { @class = "ms-TextField-field" })
+                </div>
+            </div>
+        </div>
+        <div class="ms-Grid-row">
+            <div class="ms-Grid-col ms-u-sm3 ms-u-md3 ms-u-lg3">
+                <div class="ms-TextField">
+                    <label class="ms-TextField ms-font-s-plus">
+                        <span class="ms-Label">Your App Secret</span>
+                    </label>
+                    @Html.TextBoxFor(model => model.AppSecret, new { @class = "ms-TextField-field" })
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ms-CommandButton">
+        <button type="submit" class="ms-Button ms-Button--primary">
+            <span class="ms-Button-label">Add Company Details</span>
+        </button>
+    </div>
+}
+
+

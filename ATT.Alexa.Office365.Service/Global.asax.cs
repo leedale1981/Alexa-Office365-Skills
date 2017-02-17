@@ -21,5 +21,14 @@ namespace ATT.Alexa.Office365.Service
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
         }
+
+        void Session_Start(object sender, EventArgs e)
+        {
+        }
+
+        void Session_End(object sender, EventArgs e)
+        {
+
+        }
     }
 }

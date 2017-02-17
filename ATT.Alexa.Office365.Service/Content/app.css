@@ -1,0 +1,21 @@
+﻿body {
+    padding: 50px;
+}
+
+div, span {
+    margin-top: 10px;
+}
+
+.ms-Button {
+    margin-top: 20px;
+    margin-bottom: 50px;
+}
+
+#main-content {
+    width: 85%;
+}
+
+#logo img{
+    width: 300px;
+    margin-bottom: 20px;
+}

@@ -15,6 +15,7 @@ namespace ATT.Alexa.Office365.Service.App_Start
     using System.Web.Http;
     using Repositories;
     using Models;
+    using Office365.Models;
 
     public static class NinjectWebCommon 
     {
@@ -71,8 +72,17 @@ namespace ATT.Alexa.Office365.Service.App_Start
         /// <param name="kernel">The kernel.</param>
         private static void RegisterServices(IKernel kernel)
         {
-            kernel.Bind<ICreateRepository<User>>().To<UserRepository>().InTransientScope();
-            kernel.Bind<IReadRepository<User>>().To<UserRepository>().InTransientScope();
+            kernel.Bind<Database<User>>().To<Database<User>>().InSingletonScope()
+                .WithConstructorArgument("collectionNameKey", "alexa:UserCollectionName");
+
+            kernel.Bind<Database<Company>>().To<Database<Company>>().InSingletonScope()
+                .WithConstructorArgument("collectionNameKey", "alexa:CompanyCollectionName");
+
+            kernel.Bind<ICreateRepositoryAsync<User>>().To<UserRepository>().InTransientScope();
+            kernel.Bind<IReadRepositoryAsync<User>>().To<UserRepository>().InTransientScope();
+            kernel.Bind<IReadRepositoryAsync<Event>>().To<CalendarRepository>().InTransientScope();
+            kernel.Bind<ICreateRepositoryAsync<Company>>().To<CompanyRepository>().InTransientScope();
+            kernel.Bind<IReadRepositoryAsync<Company>>().To<CompanyRepository>().InTransientScope();
         }        
     }
 }

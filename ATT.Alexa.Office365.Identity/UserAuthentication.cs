@@ -19,9 +19,8 @@ namespace ATT.Alexa.Office365.Identity
     {
         private Models.User user = null;
         private string redirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
-        private string appId = ConfigurationManager.AppSettings["ida:AppId"];
-        private string appSecret = ConfigurationManager.AppSettings["ida:AppSecret"];
         private string scopes = ConfigurationManager.AppSettings["ida:GraphScopes"];
+        private SessionTokenCache tokenCache { get; set; }
 
         public UserAuthentication(Models.User user)
         {
@@ -44,34 +43,38 @@ namespace ATT.Alexa.Office365.Identity
             return client;
         }
 
-        public bool IsAuthenticated()
+        public async Task<string> GetUserName()
         {
             try
             {
                 GraphServiceClient client = this.GetAuthenticatedClient();
                 if (client != null)
                 {
-                    return true;
+                    Microsoft.Graph.User user = await client.Me.Request().GetAsync();
+                    return user.UserPrincipalName;
                 }
             }
             catch (ServiceException)
             {
-                return false;
+                return null;
             }
 
-            return false;
+            return null;
         }
 
-        private async Task<string> GetUserAccessTokenAsync()
+        public async Task<string> GetUserAccessTokenAsync()
         {
-            SessionTokenCache tokenCache = new SessionTokenCache(
-                this.user.UserId,
+            string signedInUserID = ClaimsPrincipal.Current.FindFirst(ClaimTypes.NameIdentifier).Value;
+            tokenCache = new SessionTokenCache(
+                signedInUserID,
                 HttpContext.Current.GetOwinContext().Environment["System.Web.HttpContextBase"] as HttpContextBase);
+            //var cachedItems = tokenCache.ReadItems(appId); // see what's in the cache
 
             ConfidentialClientApplication cca = new ConfidentialClientApplication(
-                appId,
+                "https://login.microsoftonline.com/common/v2.0",
+                HttpContext.Current.Cache["companyAppId"].ToString(),
                 redirectUri,
-                new ClientCredential(appSecret),
+                new ClientCredential(HttpContext.Current.Cache["companySecret"].ToString()),
                 tokenCache);
 
             try
@@ -83,16 +86,8 @@ namespace ATT.Alexa.Office365.Identity
             // Unable to retrieve the access token silently.
             catch (MsalSilentTokenAcquisitionException)
             {
-                HttpContext.Current.Request.GetOwinContext().Authentication.Challenge(
-                    new AuthenticationProperties() { RedirectUri = "/" },
-                    OpenIdConnectAuthenticationDefaults.AuthenticationType);
-
-                throw new ServiceException(
-                    new Error
-                    {
-                        Code = GraphErrorCode.AuthenticationFailure.ToString(),
-                        Message = "Authentication Failed",
-                    });
+                HttpContext.Current.Response.Redirect("~/account/login");
+                return null;
             }
         }
     }

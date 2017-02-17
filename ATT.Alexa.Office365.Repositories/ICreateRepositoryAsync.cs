@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace ATT.Alexa.Office365.Repositories
 {
-    public interface IReadRepository<T>
+    public interface ICreateRepositoryAsync<T>
     {
-        T Read(string id);
-        IEnumerable<T> ReadAll();
+        Task<T> Create(T entity);
     }
 }

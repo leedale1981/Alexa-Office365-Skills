@@ -1,56 +1,28 @@
-﻿@model  ATT.Alexa.Office365.Models.User
+﻿@model  ATT.Alexa.Office365.Service.Models.CompanyViewModel
+@{
+    ViewBag.Title = "Alexa Office 365 Account Link.";
+}
 
-<!doctype html>
-
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-
-    <title>Alexa Office 365 Account Link.</title>
-    <meta name="description" content="Alexa Office 365 Account Link.">
-    <meta name="author" content="A Thousand Threads Ltd">
-
-    @Styles.Render("~/Content/officefabric")
-
-    <!--[if lt IE 9]>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
-    <![endif]-->
-</head>
-
-<body>
-    @using (Html.BeginForm("LinkUser", "Account", FormMethod.Post))
-    {
-        <span class="ms-font-xl">Please login with your Office 365 account.</span>
-        <div id="configs" class="ms-Grid">
-            <div class="ms-Grid-row">
-                <div class="ms-Grid-col ms-u-sm2 ms-u-md2 ms-u-lg3">
-                    <div class="ms-TextField">
-                        <label class="ms-TextField ms-font-s-plus">
-                            <span class="ms-Label">Username</span>
-                        </label>
-                        @Html.TextBoxFor(model => model.UserName, new { @class = "ms-TextField-field" })
-                    </div>
-                </div>
-                <div class="ms-Grid-col ms-u-sm3 ms-u-md3 ms-u-lg3">
-                    <div class="ms-TextField">
-                        <label class="ms-TextField ms-font-s-plus">
-                            <span class="ms-Label">Password</span>
-                        </label>
-                        @Html.PasswordFor(model => model.Password, new { @class = "ms-TextField-field" })
-                    </div>
+@using (Html.BeginForm("Authenticate", "Account", FormMethod.Post))
+{
+    <span class="ms-font-xl">Please select your company from the dropdown box.</span>
+    <div id="configs" class="ms-Grid">
+        <div class="ms-Grid-row">
+            <div class="ms-Grid-col ms-u-sm2 ms-u-md2 ms-u-lg3">
+                <div class="ms-Dropdown">
+                    <label class="ms-Label">Company</label>
+                    <i class="ms-Dropdown-caretDown ms-Icon ms-Icon--caretDown"></i>
+                    @Html.DropDownListFor(model => model.SelectedCompanyId, Model.Companies, new { @class = "ms-Dropdown-select" })
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="ms-CommandButton">
-            <button type="submit" class="ms-Button ms-Button--primary">
-                <span class="ms-Button-label">Link my account</span>
-            </button>
-        </div>
-    }
+    <div class="ms-CommandButton">
+        <button type="submit" class="ms-Button ms-Button--primary">
+            <span class="ms-Button-label">Select Company</span>
+        </button>
+    </div>
+}
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/officefabricjs")
 
-</body>
-</html>

@@ -30,7 +30,10 @@ namespace ATT.Alexa.Office365.Identity
         {
             lock (FileLock)
             {
-                Deserialize((byte[])context.Session[CacheId]);
+                if (this.context.Session != null)
+                {
+                    Deserialize((byte[])context.Session[CacheId]);
+                }
             }
         }
 

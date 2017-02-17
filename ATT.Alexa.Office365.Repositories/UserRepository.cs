@@ -1,4 +1,6 @@
 ﻿using ATT.Alexa.Office365.Models;
+using Microsoft.Azure.Documents;
+using Microsoft.Azure.Documents.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,21 +9,28 @@ using System.Threading.Tasks;
 
 namespace ATT.Alexa.Office365.Repositories
 {
-    public class UserRepository : IReadRepository<User>, ICreateRepository<User>
+    public class UserRepository : IReadRepositoryAsync<Models.User>, ICreateRepositoryAsync<Models.User>
     {
-        public User Create(User user)
+        private Database<Models.User> database = null;
+
+        public UserRepository(Database<Models.User> database)
         {
-            throw new NotImplementedException();
+            this.database = database;
         }
 
-        public User Read(string id)
+        public async Task<Models.User> Create(Models.User user)
         {
-            throw new NotImplementedException();
+            return await this.database.CreateDocument(user);
         }
 
-        public IEnumerable<User> ReadAll()
+        public async Task<Models.User> Read(Models.User user)
         {
-            throw new NotImplementedException();
+            return await this.database.GetDocument(user);
+        }
+
+        public async Task<bool> Update(Models.User user)
+        {
+            return await this.database.UpdateDocument(user);
         }
     }
 }

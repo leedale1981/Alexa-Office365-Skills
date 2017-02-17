@@ -1,0 +1,43 @@
+﻿<!doctype html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+
+        <title>@ViewBag.Title</title>
+        <meta name="description" content="Alexa Office 365 Account Link.">
+        <meta name="author" content="A Thousand Threads Ltd">
+
+        @Styles.Render("~/Content/officefabric")
+        @Styles.Render("~/Content/app")
+
+        <!--[if lt IE 9]>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <span id="logo">
+            <img src="~/Content/images/logo.jpg" alt="Alexa Office 365 Skill" />
+        </span>
+
+        <div id="main-content">
+            @RenderBody()
+        </div>
+
+        @Scripts.Render("~/bundles/jquery")
+        @Scripts.Render("~/bundles/officefabricjs")
+
+        <script lang="application/javascript">
+              // wire up dropdown controls
+              $(document).ready(function(){
+                if ($.fn.Dropdown){
+                  $('.ms-Dropdown').Dropdown();
+                }
+              });
+        </script>
+        <footer>
+            <span class="ms-font-s">Designed and developed by <a href="http://www.athoousandthreads.net">A Thousand Threads Ltd</a></span><br />
+            <span class="ms-font-s">For more help, please visit <a href="https://github.com/leedale1981/Alexa-Office365-Skills">https://github.com/leedale1981/Alexa-Office365-Skills</a></span><br />
+        </footer>
+    </body>
+</html>
