@@ -19,3 +19,7 @@ div, span {
     width: 300px;
     margin-bottom: 20px;
 }
+
+.ms-Dropdown {
+    width: 100%;
+}

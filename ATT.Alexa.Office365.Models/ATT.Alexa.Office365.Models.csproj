@@ -44,15 +44,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AlexaCard.cs" />
-    <Compile Include="AlexaJson.cs" />
-    <Compile Include="AlexaOutputSpeech.cs" />
-    <Compile Include="AlexaResponse.cs" />
-    <Compile Include="Company.cs" />
-    <Compile Include="Document.cs" />
-    <Compile Include="Event.cs" />
+    <Compile Include="Alexa\AlexaCard.cs" />
+    <Compile Include="Alexa\AlexaJson.cs" />
+    <Compile Include="Alexa\AlexaOutputSpeech.cs" />
+    <Compile Include="Alexa\AlexaResponse.cs" />
+    <Compile Include="Documents\Company.cs" />
+    <Compile Include="Documents\Document.cs" />
+    <Compile Include="Documents\Event.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="User.cs" />
+    <Compile Include="Documents\User.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

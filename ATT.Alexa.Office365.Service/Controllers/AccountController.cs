@@ -27,7 +27,9 @@ namespace ATT.Alexa.Office365.Service.Controllers
         private const string StateSessionKey = "alexastate";
         private const string ScopeSessionKey = "alexascope";
         private const string RedirectUriSessionKey = "alexaredirecturi";
-        private const string TokenTypeSessionKey = "alexatokentype";
+        private const string ResponseTypeSessionKey = "alexatokentype";
+
+        private string mockCompanyId = ConfigurationManager.AppSettings["alexa:MockCompanyId"];
 
         public AccountController(
             ICreateRepositoryAsync<User> createUserRepository, 
@@ -42,15 +44,12 @@ namespace ATT.Alexa.Office365.Service.Controllers
         public async Task<ActionResult> Login(
             string state, 
             string client_id, 
-            string response_type, 
-            string scope, 
-            string redirect_uri,
-            string token_type)
+            string response_type,  
+            string redirect_uri)
         {
-            this.Session[StateSessionKey] = state;
-            this.Session[ScopeSessionKey] = scope;
-            this.Session[RedirectUriSessionKey] = redirect_uri;
-            this.Session[TokenTypeSessionKey] = token_type;
+            if (state != null) { HttpContext.Cache[StateSessionKey] = state; }
+            if (redirect_uri != null) { HttpContext.Cache[RedirectUriSessionKey] = redirect_uri; }
+            if (response_type != null) { HttpContext.Cache[ResponseTypeSessionKey] = response_type; }
 
             var companies = await ((CompanyRepository)this.readCompanyRepository).ReadAll();
 
@@ -80,44 +79,66 @@ namespace ATT.Alexa.Office365.Service.Controllers
             HttpContext.Cache["companySecret"] = company.AppSecret;
             HttpContext.Cache["companyId"] = company.Id;
 
-            // Autheticate the user against selected company;
-            HttpContext.GetOwinContext().Authentication.Challenge(
-                new AuthenticationProperties { RedirectUri = "/account/linkuser" },
-                OpenIdConnectAuthenticationDefaults.AuthenticationType);
+            if (company.Id == this.mockCompanyId)
+            {
+                // A test company has been selected so don't try to authenticate.
+                this.LinkUser();
+            }
+            else
+            {
+                // Autheticate the user against selected company;
+                HttpContext.GetOwinContext().Authentication.Challenge(
+                    new AuthenticationProperties { RedirectUri = "/account/linkuser" },
+                    OpenIdConnectAuthenticationDefaults.AuthenticationType);
+            }
         }
 
         public async Task<ActionResult> LinkUser()
         {
             User user = new User();
             user.CompanyId = HttpContext.Cache["companyId"].ToString();
-            string signedInUserID = ((ClaimsPrincipal)Thread.CurrentPrincipal).FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            // Authenticate user with O365
-            UserAuthentication auth = new UserAuthentication(user);
-            string upn = await auth.GetUserName();
-
-            if (!string.IsNullOrEmpty(upn))
+            if (user.CompanyId == this.mockCompanyId)
             {
-                // Create user in DB
-                user.Id = signedInUserID;
-                user.UserName = upn;
-
-                string appId = HttpContext.Cache["companyAppId"].ToString();
-                var cachedItems = new SessionTokenCache(signedInUserID, HttpContext).ReadItems(appId);
-                user.AccessToken = cachedItems.ToList()[0].Token;
-                await createUserRepository.Create(user);
-
-                // Redirect to Alexa app with user id.
-                string queryStrings = "&state=" + HttpUtility.HtmlEncode(this.Session[StateSessionKey])
-                    + "&access_token=" + HttpUtility.HtmlEncode(user.Id)
-                    + "&token_type=Bearer";
-                this.Response.Redirect(this.Session[RedirectUriSessionKey] + queryStrings);
-                return null;
+                MockUserRepository mockUsers = new MockUserRepository();
+                return await this.RedirectToAlexa(await mockUsers.Read(null));
             }
             else
             {
-                return new RedirectResult("/account/login");
+                string signedInUserID = ((ClaimsPrincipal)Thread.CurrentPrincipal).FindFirst(ClaimTypes.NameIdentifier).Value;
+
+                // Authenticate user with O365
+                UserAuthentication auth = new UserAuthentication(user);
+                string upn = await auth.GetUserName();
+
+                if (!string.IsNullOrEmpty(upn))
+                {
+                    // Create user in DB
+                    user.Id = signedInUserID;
+                    user.UserName = upn;
+
+                    string appId = HttpContext.Cache["companyAppId"].ToString();
+                    var cachedItems = new SessionTokenCache(signedInUserID, HttpContext).ReadItems(appId);
+                    user.AccessToken = cachedItems.ToList()[0].Token;
+                    await createUserRepository.Create(user);
+
+                    return await this.RedirectToAlexa(user);
+                }
+                else
+                {
+                    return new RedirectResult("/account/login");
+                }
             }
+        }
+
+        private async Task<ActionResult> RedirectToAlexa(User user)
+        {
+            // Redirect to Alexa app with user id.
+            string queryStrings = "#state=" + HttpUtility.HtmlEncode(HttpContext.Cache[StateSessionKey])
+                + "&access_token=" + HttpUtility.HtmlEncode(user.Id)
+                + "&token_type=Bearer";
+            this.Response.Redirect(HttpContext.Cache[RedirectUriSessionKey] + queryStrings);
+            return null;
         }
     }
 }

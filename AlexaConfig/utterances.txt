@@ -1,4 +1,5 @@
-GetOfficeCalendarToday what does my office calendar look like {Date}
-GetOfficeCalendarToday what does my office schedule look like {Date}
-GetOfficeCalendarToday office calendar {Date}
-GetOfficeCalendarToday what is my office schedule {Date}
+GetOfficeCalendarToday ask Office Calendar what my schedule looks like {Date}
+GetOfficeCalendarToday ask Office Calendar for my schedule {Date}
+GetOfficeCalendarToday ask Office Calandar what is my work schedule {Date}
+GetOfficeCalendarToday ask Office Calandar what events I have today {Date}
+GetOfficeCalendarToday ask Office Calandar what my day looks like {Date}

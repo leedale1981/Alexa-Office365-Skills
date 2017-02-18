@@ -50,7 +50,7 @@ namespace ATT.Alexa.Office365.Service
                     TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateAudience = false,
-                        ValidateIssuer = false,
+                        ValidateIssuer = false
                         // In a real application you would use IssuerValidator for additional checks, 
                         // like making sure the user's organization has signed up for your app.
                         //     IssuerValidator = (issuer, token, tvp) =>
@@ -83,7 +83,7 @@ namespace ATT.Alexa.Office365.Service
                         AuthenticationFailed = (context) =>
                         {
                             context.HandleResponse();
-                            context.Response.Redirect("/Error?message=" + context.Exception.Message);
+                            context.Response.Redirect("/account/login");
                             return Task.FromResult(0);
                         },
                         RedirectToIdentityProvider = (context) =>

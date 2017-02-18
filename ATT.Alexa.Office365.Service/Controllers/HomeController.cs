@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Configuration;
 using System.Web.Http;
 using System.Web.Mvc;
 
@@ -18,6 +19,7 @@ namespace ATT.Alexa.Office365.Service.Controllers
         private IReadRepositoryAsync<User> readUserRepository = null;
         private IReadRepositoryAsync<Event> readCalendarRepository = null;
         private IReadRepositoryAsync<Company> readCompanyRepository = null;
+        private string mockCompanyId = WebConfigurationManager.AppSettings["alexa:MockCompanyId"];
 
         public CalendarController(
             IReadRepositoryAsync<User> readUserRepository,
@@ -41,12 +43,34 @@ namespace ATT.Alexa.Office365.Service.Controllers
                 User user = await this.readUserRepository.Read(requestUser);
                 if (await this.SetCachedCompanyValues(user))
                 {
-                    var eventRequest = await ((CalendarRepository)readCalendarRepository).ReadEventsForUser(user);
-                    events = eventRequest.ToList();
+                    if (user.CompanyId == mockCompanyId)
+                    {
+                        MockCalendarRepository eventsRepo = new MockCalendarRepository(user);
+                        events = (await eventsRepo.ReadEventsForUser(user)).ToList();
+                    }
+                    else
+                    {
+                        var eventRequest = await ((CalendarRepository)readCalendarRepository).ReadEventsForUser(user);
+                        events = eventRequest.ToList();
+                    }
                 }
+            }
+            else
+            {
+                // Testing from Amazon Service Simulator with no linked user.
+                events = await this.GetMockedEventsWithoutUser();
             }
 
             return this.GetCalendarAlexaResponse(events);
+        }
+
+        private async Task<List<Event>> GetMockedEventsWithoutUser()
+        {
+            MockUserRepository mockUserRepo = new MockUserRepository();
+            User user = await mockUserRepo.Read(null);
+
+            MockCalendarRepository eventsRepo = new MockCalendarRepository(user);
+            return  (await eventsRepo.ReadEventsForUser(user)).ToList();
         }
 
         private async Task<bool> SetCachedCompanyValues(User user)
@@ -69,18 +93,22 @@ namespace ATT.Alexa.Office365.Service.Controllers
         private AlexaJson GetCalendarAlexaResponse(List<Event> events)
         {
             string cardContent = string.Empty;
-            string speechText = "You have the following events in your calendar.";
+            string speechText = "You have the following events in your calendar today.";
+            int count = 1;
 
             foreach (Event calEvent in events)
             {
-                cardContent += "Date: " + calEvent.Date + "\n";
-                cardContent += "Event: " + calEvent.Subject + "\n";
-                cardContent += "Location: " + calEvent.Location + "\r\n";
+                cardContent += " Event - " + calEvent.Subject + "\n";
+                cardContent += " Location - " + calEvent.Location + "\r\n";
 
-                speechText += "Date " + calEvent.Date.DayOfWeek + " " + calEvent.Date.Day + " " + calEvent.Date.Month;
-                speechText += ". About " + calEvent.Subject;
-                speechText += ". At " + calEvent.Location;
+                if (count > 1) { speechText += ". Then "; }
+                speechText += " " + calEvent.Subject;
+                speechText += " at " + calEvent.Date.ToString("HHtt");
+                speechText += " at location " + calEvent.Location;
+                count++;
             }
+
+            speechText += ". That's all for today.";
 
             AlexaCard card = new AlexaCard();
             card.Type = "Simple";

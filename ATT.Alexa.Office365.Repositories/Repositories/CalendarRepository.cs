@@ -22,7 +22,7 @@ namespace ATT.Alexa.Office365.Repositories
 
         public async Task<Models.Event> Read(Models.Event entity)
         {
-            return this.ReadEventsForUser(this.user).Result
+            return (await this.ReadEventsForUser(this.user))
                 .Where(e => e.Id == entity.Id).FirstOrDefault();    
         }
 
@@ -36,7 +36,7 @@ namespace ATT.Alexa.Office365.Repositories
             {
                 userEvents = await client.Me.Calendar.Events.Request().GetAsync();
             }
-            catch (Exception exception)
+            catch (Exception)
             {
                 try
                 {
@@ -46,7 +46,7 @@ namespace ATT.Alexa.Office365.Repositories
                     user.AccessToken = newAccessToken;
                     await ((UserRepository)this.userRepository).Update(user);
                 }
-                catch (Exception newException)
+                catch (Exception)
                 {
                     throw;
                 }
@@ -56,12 +56,17 @@ namespace ATT.Alexa.Office365.Repositories
 
             foreach (Microsoft.Graph.Event graphEvent in userEvents)
             {
-                myEvents.Add(new Models.Event()
+                DateTime date = DateTime.ParseExact(graphEvent.Start.DateTime, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+
+                if (date.Date == DateTime.Now.Date)
                 {
-                    Date = DateTime.ParseExact(graphEvent.Start.DateTime, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
-                    Location = graphEvent.Location.DisplayName,
-                    Subject = graphEvent.Subject
-                });
+                    myEvents.Add(new Models.Event()
+                    {
+                        Date = date,
+                        Location = graphEvent.Location.DisplayName,
+                        Subject = graphEvent.Subject
+                    });
+                }
             }
 
             return myEvents;
